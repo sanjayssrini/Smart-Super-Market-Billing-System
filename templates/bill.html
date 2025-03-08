@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amrita Supermarket Billing System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: auto;
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #282c34;
+            animation: backgroundAnimation 15s ease infinite;
+            color: white;
+        }
+
+        @keyframes backgroundAnimation {
+            0% {
+                background-color: #282c34;
+            }
+
+            50% {
+                background-color: #3f51b5;
+            }
+
+            100% {
+                background-color: #282c34;
+            }
+        }
+
+        h1 {
+            color: #f1c40f;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 2.5rem;
+            z-index: 1;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .billing-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+            overflow: auto;
+            z-index: 2;
+            margin-top: 20px;
+            transform: scale(1);
+            animation: popIn 0.5s ease forwards;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #f1c40f;
+            animation: borderAnimation 0.5s ease;
+        }
+
+        @keyframes borderAnimation {
+            from {
+                border-color: #ccc;
+            }
+
+            to {
+                border-color: #f1c40f;
+            }
+        }
+
+        .center-button {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f1c40f;
+            color: #333;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s, transform 0.3s;
+            position: relative;
+            overflow: auto;
+        }
+
+        button:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ccc;
+            font-size: 1.2rem;
+            color: black;
+            transition: background-color 0.3s;
+        }
+
+        th {
+            background-color: #f1c40f;
+            color: #333;
+        }
+
+        tr:hover td {
+            background-color: rgba(241, 196, 15, 0.3);
+        }
+
+        .pay-button {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .modal-content {
+            background: #000000;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #dc3545;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+
+        .close-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Amrita Supermarket Billing System</h1>
+
+    <div class="billing-container">
+        <div class="input-group">
+            <input type="text" id="productId" placeholder="Product ID" required>
+            <input type="number" id="productQuantity" placeholder="Quantity" value="1" required>
+            <button id="addProductBtn">Add Product</button>
+        </div>
+
+        <table id="billTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div class="total" style="color:#000000;margin-top: 20px; text-align: right;">
+            Total: ₹<span id="totalAmount">0.00</span>
+        </div>
+        <div class="pay-button" style="margin-top: 20px;">
+            <button id="payNowBtn" onclick="generateBill()">Pay Now</button>
+        </div>
+
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <h2>Payment Processing</h2>
+                <p>Your payment is being processed...</p>
+                <a href="/logout">
+                    <button class="close-btn" id="closeModalBtn">Close</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max); // Round down to the nearest whole number
+            return Math.floor(Math.random() * (max - min + 1)) + min; // Generate random integer
+        }
+        function generateBill() {
+            // Access jsPDF via window.jspdf.jsPDF
+            let doc = new window.jspdf.jsPDF();
+            let id = {{ customer_id }};
+            let name = "{{ customer_name }}";
+            const randomInt = getRandomInt(1000, 9999);  
+            // Get data from the bill table
+            let billTable = document.getElementById("billTable");
+            let rows = billTable.querySelectorAll("tbody tr");
+
+            let data = [];
+            rows.forEach(function (row) {
+                let rowData = [];
+                let cells = row.querySelectorAll("td");
+                cells.forEach(function (cell, index) {
+                    if (index < cells.length - 1) { // Exclude the "Action" column
+                        rowData.push(cell.textContent);
+                    }
+                });
+                data.push(rowData);
+            });
+
+            // Add headers
+            let headers = Array.from(billTable.querySelectorAll("th"))
+                .map(header => header.textContent)
+                .filter((header, index, self) => self.indexOf(header) === index); // Get unique headers
+
+            // Calculate total amount
+            let totalAmount = parseFloat(document.getElementById('totalAmount').textContent);
+
+            // Set up document content
+            doc.setFontSize(16);
+            doc.text("Amrita Supermarket Billing System", 105, 20, null, null, "center");
+
+            doc.setFontSize(12);
+            doc.text(`Customer ID: ${id}`, 14, 30);
+            doc.text(`Customer Name: ${name}`, 14, 40); 
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 50);
+            doc.text(`Time: ${new Date().toLocaleTimeString()}`, 14, 60);
+            doc.text(`Bill Number: ${randomInt}`, 14, 70);
+            // Add table using autoTable plugin (or your preferred method)
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 75,
+                theme: 'grid',
+            });
+
+            // Add total amount
+            doc.setFontSize(12);
+            doc.text(`Total:  ${totalAmount.toFixed(2)}`, 140, doc.lastAutoTable.finalY + 10);
+
+            // Generate PDF and trigger download
+            doc.save(`ID${id}_${randomInt}.pdf`);
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let totalAmount = 0;
+            let customer_id = {{ customer_id }};
+            let customer_name = "{{ customer_name }}"; 
+            console.log(customer_name);
+            console.log(customer_id);
+            document.getElementById('addProductBtn').addEventListener('click', function () {
+                const productId = document.getElementById('productId').value;
+                const quantity = parseInt(document.getElementById('productQuantity').value);
+
+                fetch('/bill', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `product_id=${productId}&quantity=${quantity}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            addProductToBill(productId, quantity);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding product:', error);
+                        alert('An error occurred while adding the product.');
+                    });
+            });
+
+            function addProductToBill(productId, quantity) {
+                fetch('/bill', { // This route should now handle getting product details too
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `product_id=${productId}&quantity=${quantity}`
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(product => {
+                        const tableBody = document.querySelector('#billTable tbody');
+                        const newRow = tableBody.insertRow();
+                        const amount = quantity * parseFloat(product.price);
+                        totalAmount += amount;
+                        //the problem is here actually
+                        newRow.innerHTML = `
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${quantity}</td>
+                <td>₹${product.price}</td>
+                <td>₹${amount.toFixed(2)}</td>
+                <td><button onclick="removeItem(${product.id})">Remove</button></td> 
+            `;
+
+                        document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+                    })
+                    .catch(error => {
+                        console.error('Error adding product:', error);
+                        alert('An error occurred while adding the product.');
+                    });
+            }
+
+
+            function removeItem(itemId) {
+                fetch(`/remove_item/${itemId}`, {
+                    method: 'GET'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error removing item:', error);
+                        alert('An error occurred while removing the item.');
+                    });
+            }
+
+            document.getElementById('payNowBtn').addEventListener('click', function(){
+                document.getElementById('paymentModal').style.display = 'flex';
+                generateBill(); 
+            });
+
+            document.getElementById('closeModalBtn').addEventListener('click', function () {
+                document.getElementById('paymentModal').style.display = 'none';
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>
