@@ -1,6 +1,6 @@
 # Smart Supermarket Self-Billing System
 
-This is an innovative project done by [Sanjay S](https://github.com/sanjayssrini) and [Subhashini SM](https://github.com/subhashinism) on September 2024.
+This is an innovative project done by [Sanjay S](https://github.com/sanjayssrini) and [Subhashini SM](https://github.com/subhashini-s-m) on September 2024.
 
 ## Overview
 Smart Supermarket Self-Billing System is an eco-friendly, efficient billing solution designed to streamline supermarket checkouts while reducing the carbon footprint by eliminating paper receipts. The project started as a C-based application utilizing MySQL for data management and Cairo for PDF generation, and later evolved into a Python-powered system with a modern web-based UI built using HTML, CSS, and JavaScript.
